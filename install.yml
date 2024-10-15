@@ -1,0 +1,126 @@
+- name: install CamillaDSP
+  hosts: all
+  vars:
+    - cpu_architecture: aarch64
+    - os: linux
+    - user: "{{ ansible_env.USER }}"
+    - home: "{{ ansible_env.HOME }}"
+    - install_directory: "{{ home }}/camilladsp"
+    - release_image: "camilladsp-{{ os }}-{{ cpu_architecture }}.tar.gz"
+  tasks:
+    - name: install apt packages
+      become: true
+      ansible.builtin.apt:
+        pkg:
+        - alsa-utils
+        - git
+        - python3
+        - python3-pip
+        - python3-websocket
+        - python3-aiohttp
+        - python3-jsonschema
+
+    - name: install pip packages
+      ansible.builtin.pip:
+        name: 
+          - git+https://github.com/HEnquist/pycamilladsp.git
+          - git+https://github.com/HEnquist/pycamilladsp-plot.git
+        extra_args: --break-system-packages
+
+    - name: make directories for CamillaDSP
+      ansible.builtin.file:
+        path: "{{ install_directory }}/{{ item }}"
+        state: directory
+        mode: '0700'
+        owner: "{{ user }}"
+        group: "{{ user }}"
+      loop:
+        - ""
+        - "/configs"
+        - "/coeffs"
+
+    - name: download CamillaDSP
+      ansible.builtin.get_url:
+        url: "https://github.com/HEnquist/camilladsp/releases/latest/download/{{ release_image }}"
+        dest: "{{ install_directory }}/"
+        force: true
+
+    - name: untar release
+      become: true
+      ansible.builtin.unarchive:
+        remote_src: yes
+        src: "{{ install_directory }}/{{ release_image }}" 
+        dest: /usr/local/bin/
+
+    - name: install CamillaDSP service
+      become: true
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/mdsimon2/RPi-CamillaDSP/main/camilladsp.service
+        dest: /lib/systemd/system/
+
+    - name: configure CamillaDSP service
+      become: true
+      ansible.builtin.lineinfile:
+        path: /lib/systemd/system/camilladsp.service
+        search_string: "{{ item.search_string }}"
+        line: "{{ item.line }}"
+        owner: root
+        group: root
+        mode: '0600'
+      loop:
+       - { search_string: 'User=username', line: "User={{ user }}" }
+       - { search_string: 'WorkingDirectory=~', line: "WorkingDirectory={{ home }}" }
+
+    - name: deploy CamillaDSP service
+      become: true
+      ansible.builtin.systemd_service:
+        name: camilladsp
+        state: started
+        enabled: true
+
+    - name: make directory for Camilla GUI
+      ansible.builtin.file:
+        path: "{{ install_directory }}/camillagui"
+        state: directory
+        mode: '0700'
+        owner: "{{ user }}"
+        group: "{{ user }}"
+
+    - name: download Camilla GUI
+      ansible.builtin.get_url:
+        url: https://github.com/HEnquist/camillagui-backend/releases/latest/download/camillagui.zip
+        dest: "{{ install_directory }}/"
+        force: true
+
+    - name: install Camilla GUI
+      ansible.builtin.unarchive:
+        remote_src: yes
+        src: "{{ install_directory }}/camillagui.zip"
+        dest: "{{ install_directory }}/camillagui"
+
+    - name: install Camilla GUI service
+      become: true
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/mdsimon2/RPi-CamillaDSP/main/camillagui.service
+        dest: /lib/systemd/system/
+
+    - name: configure Camilla GUI service
+      become: true
+      ansible.builtin.lineinfile:
+        path: /lib/systemd/system/camillagui.service
+        search_string: "{{ item.search_string }}"
+        line: "{{ item.line }}"
+        owner: root
+        group: root
+        mode: '0600'
+      loop: 
+       - { search_string: 'User=username', line: "User={{ user }}" }
+       - { search_string: 'WorkingDirectory=~', line: "WorkingDirectory={{ home }}"}
+
+    - name: deploy Camilla GUI service
+      become: true
+      ansible.builtin.systemd_service:
+        name: camillagui
+        state: started
+        enabled: true
+
