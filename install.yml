@@ -7,6 +7,7 @@
     - home: "{{ ansible_env.HOME }}"
     - install_directory: "{{ home }}/camilladsp"
     - release_image: "camilladsp-{{ os }}-{{ cpu_architecture }}.tar.gz"
+    - gui_port: 5005
   tasks:
     - name: install apt packages
       become: true
@@ -97,6 +98,12 @@
         remote_src: yes
         src: "{{ install_directory }}/camillagui.zip"
         dest: "{{ install_directory }}/camillagui"
+
+    - name: configure Camilla GUI port
+      ansible.builtin.lineinfile:
+        path: "{{ install_directory }}/camillagui/config/camillagui.yml"
+        search_string: 'port:'
+        line: "port: {{ gui_port }}"
 
     - name: install Camilla GUI service
       become: true
