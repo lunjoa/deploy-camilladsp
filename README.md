@@ -1,1 +1,1 @@
-ansible-playbook install.yml -i "user@host"
+ansible-playbook install.yml -i "user@host,"
