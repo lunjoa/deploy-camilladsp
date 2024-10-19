@@ -6,6 +6,7 @@
     - user: "{{ ansible_env.USER }}"
     - home: "{{ ansible_env.HOME }}"
     - install_directory: "{{ home }}/camilladsp"
+    - camilladsp_profile: ""
     - release_image: "camilladsp-{{ os }}-{{ cpu_architecture }}.tar.gz"
     - gui_port: 5005
   tasks:
@@ -55,28 +56,20 @@
 
     - name: install CamillaDSP service
       become: true
-      ansible.builtin.get_url:
-        url: https://raw.githubusercontent.com/mdsimon2/RPi-CamillaDSP/main/camilladsp.service
-        dest: /lib/systemd/system/
+      template:
+        src: camilladsp.service.j2
+        dest: /lib/systemd/system/camilladsp.service
+        mode: 644
 
-    - name: configure CamillaDSP service
-      become: true
-      ansible.builtin.lineinfile:
-        path: /lib/systemd/system/camilladsp.service
-        search_string: "{{ item.search_string }}"
-        line: "{{ item.line }}"
-        owner: root
-        group: root
-        mode: '0600'
-      loop:
-       - { search_string: 'User=username', line: "User={{ user }}" }
-       - { search_string: 'WorkingDirectory=~', line: "WorkingDirectory={{ home }}" }
+    - name: reload systemctl
+      become: yes
+      ansible.builtin.command: systemctl daemon-reload
 
     - name: deploy CamillaDSP service
       become: true
       ansible.builtin.systemd_service:
         name: camilladsp
-        state: started
+        state: restarted
         enabled: true
 
     - name: make directory for Camilla GUI
@@ -119,15 +112,19 @@
         line: "{{ item.line }}"
         owner: root
         group: root
-        mode: '0600'
+        mode: 644
       loop: 
        - { search_string: 'User=username', line: "User={{ user }}" }
        - { search_string: 'WorkingDirectory=~', line: "WorkingDirectory={{ home }}"}
+
+    - name: reload systemctl
+      become: yes
+      ansible.builtin.command: systemctl daemon-reload
 
     - name: deploy Camilla GUI service
       become: true
       ansible.builtin.systemd_service:
         name: camillagui
-        state: started
+        state: restarted
         enabled: true
 
