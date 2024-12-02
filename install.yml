@@ -6,7 +6,7 @@
     - user: "{{ ansible_env.USER }}"
     - home: "{{ ansible_env.HOME }}"
     - install_directory: "{{ home }}/camilladsp"
-    - camilladsp_profile: ""
+    - camilladsp_profile: "configs/config.yml"
     - release_image: "camilladsp-{{ os }}-{{ cpu_architecture }}.tar.gz"
     - gui_port: 5005
   tasks:
