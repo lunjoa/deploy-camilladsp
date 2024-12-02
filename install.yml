@@ -24,7 +24,7 @@
 
     - name: install pip packages
       ansible.builtin.pip:
-        name: 
+        name:
           - git+https://github.com/HEnquist/pycamilladsp.git
           - git+https://github.com/HEnquist/pycamilladsp-plot.git
         extra_args: --break-system-packages
@@ -51,7 +51,7 @@
       become: true
       ansible.builtin.unarchive:
         remote_src: yes
-        src: "{{ install_directory }}/{{ release_image }}" 
+        src: "{{ install_directory }}/{{ release_image }}"
         dest: /usr/local/bin/
 
     - name: install CamillaDSP service
@@ -113,7 +113,7 @@
         owner: root
         group: root
         mode: 644
-      loop: 
+      loop:
        - { search_string: 'User=username', line: "User={{ user }}" }
        - { search_string: 'WorkingDirectory=~', line: "WorkingDirectory={{ home }}"}
 
