@@ -1,200 +1,87 @@
 description: null
 devices:
-  adjust_period: 10
+  adjust_period: null
   capture:
     channels: 2
-    device: hw:ICUSBAUDIO7D,0,0
+    device: plughw:CARD=ICUSBAUDIO7D,DEV=0
     format: S16LE
+    labels: null
+    link_mute_control: null
+    link_volume_control: null
+    stop_on_inactive: false
     type: Alsa
-  capture_samplerate: 48000
+  capture_samplerate: 44100
   chunksize: 64
   enable_rate_adjust: false
+  multithreaded: null
   playback:
     channels: 2
-    device: hw:ICUSBAUDIO7D,0,0
+    device: hw:CARD=ICUSBAUDIO7D,DEV=0
     format: S16LE
     type: Alsa
-  queuelimit: 4
-  rate_measure_interval: 1
+  queuelimit: 1
+  rate_measure_interval: null
   resampler: null
   samplerate: 48000
-  silence_threshold: -100
-  silence_timeout: 5
-  stop_on_rate_change: false
-  target_level: 127
+  silence_threshold: null
+  silence_timeout: null
+  stop_on_rate_change: null
+  target_level: null
+  volume_limit: null
   volume_ramp_time: null
+  worker_threads: 0
 filters:
-  Dither Shibata48:
-    description: null
-    parameters:
-      bits: 16
-      type: Shibata48
-    type: Dither
   Gain:
     description: null
     parameters:
-      gain: -2
+      gain: -0.7
       inverted: false
       mute: false
       scale: dB
     type: Gain
-  "H\xF6ger Stol Impulse Response":
+  Left:
     description: null
     parameters:
       channel: 0
-      filename: "../coeffs/ho\u0308ger-stol-impulse-response.wav"
+      filename: ../coeffs/Umik-vanster-stol-48.wav
       type: Wav
     type: Conv
-  "Second Pass H\xF6ger Stol Impulse Response":
+  Mute:
+    description: null
+    parameters:
+      gain: 0
+      inverted: false
+      mute: true
+      scale: dB
+    type: Gain
+  Right:
     description: null
     parameters:
       channel: 0
-      filename: "../coeffs/second-pass-ho\u0308ger-stol-impulse-48k.wav"
+      filename: ../coeffs/Umik-hoger-stol-48.wav
       type: Wav
     type: Conv
-  "Second Pass V\xE4nster Stol Impulse Response":
-    description: null
-    parameters:
-      channel: 0
-      filename: "../coeffs/second-pass-va\u0308nster-stol-impulse-48k.wav"
-      type: Wav
-    type: Conv
-  "V\xE4nster Stol Impulse Response":
-    description: null
-    parameters:
-      channel: 0
-      filename: "../coeffs/va\u0308nster-stol-impulse-response.wav"
-      type: Wav
-    type: Conv
-mixers:
-  Combine:
-    channels:
-      in: 4
-      out: 2
-    description: null
-    mapping:
-    - dest: 0
-      mute: null
-      sources:
-      - channel: 0
-        gain: 0.5
-        inverted: null
-        mute: null
-        scale: linear
-      - channel: 2
-        gain: 0.5
-        inverted: null
-        mute: null
-        scale: linear
-    - dest: 1
-      mute: null
-      sources:
-      - channel: 1
-        gain: 0.5
-        inverted: null
-        mute: null
-        scale: linear
-      - channel: 3
-        gain: 0.5
-        inverted: null
-        mute: null
-        scale: linear
-  Split:
-    channels:
-      in: 2
-      out: 4
-    description: null
-    mapping:
-    - dest: 0
-      mute: null
-      sources:
-      - channel: 0
-        gain: 1
-        inverted: null
-        mute: null
-        scale: linear
-    - dest: 1
-      mute: null
-      sources:
-      - channel: 1
-        gain: 1
-        inverted: null
-        mute: null
-        scale: linear
-    - dest: 2
-      mute: null
-      sources:
-      - channel: 0
-        gain: 1
-        inverted: null
-        mute: null
-        scale: linear
-    - dest: 3
-      mute: null
-      sources:
-      - channel: 1
-        gain: 1
-        inverted: null
-        mute: null
-        scale: linear
+mixers: {}
 pipeline:
-- bypassed: false
-  channel: 0
+- bypassed: null
+  channels: null
   description: null
   names:
   - Gain
-  - "V\xE4nster Stol Impulse Response"
-  - "Second Pass V\xE4nster Stol Impulse Response"
   type: Filter
-- bypassed: false
-  channel: 1
+- bypassed: null
+  channels:
+  - 0
   description: null
   names:
-  - Gain
-  - "H\xF6ger Stol Impulse Response"
-  - "Second Pass H\xF6ger Stol Impulse Response"
+  - Left
   type: Filter
-- bypassed: true
-  description: null
-  name: Split
-  type: Mixer
-- bypassed: true
-  description: null
-  name: Compressor
-  type: Processor
-- bypassed: true
-  description: null
-  name: Combine
-  type: Mixer
-- bypassed: false
-  channel: 0
+- bypassed: null
+  channels:
+  - 1
   description: null
   names:
-  - Dither Shibata48
+  - Right
   type: Filter
-- bypassed: false
-  channel: 1
-  description: null
-  names:
-  - Dither Shibata48
-  type: Filter
-processors:
-  Compressor:
-    description: null
-    parameters:
-      attack: 0.03
-      channels: 4
-      clip_limit: 0.1
-      factor: 3
-      makeup_gain: 0
-      monitor_channels:
-      - 0
-      - 1
-      process_channels:
-      - 0
-      - 1
-      release: 0.03
-      soft_clip: false
-      threshold: -6
-    type: Compressor
-title: config-48kHz
+processors: {}
+title: Room-correction
