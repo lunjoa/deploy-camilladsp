@@ -54,6 +54,14 @@
         src: "{{ install_directory }}/{{ release_image }}"
         dest: /usr/local/bin/
 
+    - name: Sync config
+      ansible.builtin.copy:
+        src: config.yml
+        dest: "{{ install_directory }}/configs/config.yml"
+        mode: 0600
+        owner: "{{ user }}"
+        group: "{{ user }}"
+
     - name: install CamillaDSP service
       become: true
       template:
